@@ -1,16 +1,18 @@
-""" a simple script for parsing an EBNF grammar and  computing FIRST and FOLLOW
+r""" a simple script for parsing an EBNF grammar and  computing FIRST and FOLLOW
 sets. """
+
+from texttable import Texttable
 
 # The grammar and start of the expression
 S = "program"
 grammar = """
-    program     = [stmtList] ;
-    stmtList    = stmt [stmtList] ;
+    program     = [stmtList];
+    stmtList    = stmt [stmtList];
     stmt        = 'id' ':=' expr ;
     expr        = term [termTail] ;
-    termTail    = addOp term [termTail] ;
+    termTail    = addOp term [termTail];
     term        = factor [factorTail] ;
-    factorTail  = multOp factor [factorTail] ;
+    factorTail  = multOp factor [factorTail];
     factor      = '(' expr ')' | 'id' ;
     addOp       = '+' | '-' ;
     multOp      = '*' | '/'
@@ -32,10 +34,13 @@ def productions(grammar):
     """ returns a dictionary with the left side of a production as keys and
     right side as values """
     P = {}
-    for i, line in enumerate(grammar.split(sep=';')):
+    for line in grammar.split(sep=';'):
         left, right = [s.strip() for s in line.split(sep='=', maxsplit=1)]
         right = [s.strip() for s in right.split(sep='|')]
         P[left] = right
+    for N in P:
+        if not grammar.find('[' + N + ']') == -1:
+            P[N].append(eps)
     return P
 
 def _size_of_dict(dictionary):
@@ -49,7 +54,7 @@ def _size_of_dict(dictionary):
 # calculates terminal and non-terminal symbol sets
 P = productions(grammar)
 N = set(P.keys())
-T = {s.strip("'") for s in grammar.split() if s[0] == s[-1] == "'"}
+T = {s.strip("'") for s in grammar.split() if s[0] == s[-1] == "'"} - {eps}
 
 def first(input):
     """ returns the FIRST set for a given input \in (N u T)* """
@@ -59,7 +64,7 @@ def first(input):
         return set([input.strip("'")])
 
     elif input == eps:
-        return set(eps)
+        return set([eps])
 
     elif input in N:
         for alpha in P[input]:
@@ -137,8 +142,6 @@ for k, v in FOLLOW.items():
 
 for k, v in parse_table().items():
     print("Parse Table column ({0}) = {1}".format(k, v))
-
-from texttable import Texttable
 
 parse_table = parse_table()
 
