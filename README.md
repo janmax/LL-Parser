@@ -1,1 +1,9 @@
-# LL_Parser
+## LL_Parser
+
+This tiny little script is not intended to serve any propose but to write some
+code on a rainy weekend and learn a bit more about parsing stuff/grammar.
+
+#### TODO
+* Make first sets a dictionary
+* refactor object-orientated (the parser as class)
+* make table deterministic
