@@ -1,4 +1,4 @@
-r""" a simple script for parsing an EBNF grammar and  computing FIRST and FOLLOW
+r""" a simple script for parsing an EBNF grammar and computing FIRST and FOLLOW
 sets. """
 
 from texttable import Texttable
@@ -18,14 +18,14 @@ grammar = """
     multOp      = '*' | '/'
 """.strip()
 
-# S = "E"
-# grammar = """
+#S = "E"
+#grammar = """
 #     E   = T [E#] ;
 #     E#  = '+' T [E#] ;
 #     T   = F [T#] ;
 #     T#  = '∗' F [T#] ;
 #     F   = '(' E ')' | 'id'
-# """.strip()
+#""".strip()
 
 # The empty string for better readability
 eps = 'eps'
@@ -61,21 +61,21 @@ def first(input):
     FirstA = set([])
 
     if input.strip("'") in T:
-        return set([input.strip("'")])
+        return {input.strip("'")}
 
     elif input == eps:
-        return set([eps])
+        return {eps}
 
     elif input in N:
         for alpha in P[input]:
             FirstA |= first(alpha)
 
     elif input.strip('[]') in N:
-        FirstA |= set([eps]) | first(input.strip('[]'))
+        FirstA |= {eps} | first(input.strip('[]'))
 
     else:
         for alpha in input.split(sep=' '):
-            FirstA |= (first(alpha) - set([eps]))
+            FirstA |= first(alpha) - {eps}
             if eps not in FirstA:
                 break
 
@@ -85,8 +85,8 @@ def followSet():
     """ Wrapper function for computing the FOLLOW sets of a given grammer """
     FOLLOW = {}
     for A in N:
-        FOLLOW[A] = set([])
-    FOLLOW[S].add('$$')
+        FOLLOW[A] = set()
+    FOLLOW[S] |= {'$$'}
 
     old = None
     while old != _size_of_dict(FOLLOW):
@@ -107,7 +107,7 @@ def _calcFollow(FOLLOW):
                 succ = text[i + 1]
 
                 if B in N:
-                    FOLLOW[B] |= first(succ) - set([eps])
+                    FOLLOW[B] |= first(succ) - {eps}
 
                 if eps in first(succ) and B in N:
                     FOLLOW[B] |= FOLLOW[A]

@@ -5,5 +5,8 @@ code on a rainy weekend and learn a bit more about parsing stuff/grammar.
 
 #### TODO
 * Make first sets a dictionary
-* refactor object-orientated (the parser as class)
 * make table deterministic
+
+#### Dependencies
+
+*texttable for parse table output
