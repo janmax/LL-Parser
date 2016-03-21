@@ -1,5 +1,5 @@
-r""" a simple script for parsing an EBNF grammar and computing FIRST and FOLLOW
-sets. """
+r""" DEPRECATED. Better take a look at ParseFirstFollow.py. This is a simple
+script for parsing an EBNF grammar and computing FIRST and FOLLOW sets. """
 
 from texttable import Texttable
 
@@ -18,17 +18,10 @@ grammar = """
     multOp      = '*' | '/'
 """.strip()
 
-#S = "E"
-#grammar = """
-#     E   = T [E#] ;
-#     E#  = '+' T [E#] ;
-#     T   = F [T#] ;
-#     T#  = '∗' F [T#] ;
-#     F   = '(' E ')' | 'id'
-#""".strip()
 
 # The empty string for better readability
 eps = 'eps'
+
 
 def productions(grammar):
     """ returns a dictionary with the left side of a production as keys and
@@ -39,9 +32,10 @@ def productions(grammar):
         right = [s.strip() for s in right.split(sep='|')]
         P[left] = right
     for N in P:
-        if not grammar.find('[' + N + ']') == -1:
+        if '[' + N + ']' in grammar:
             P[N].append(eps)
     return P
+
 
 def _size_of_dict(dictionary):
     """ Helper function which returns sum of all used keys and items in the
@@ -55,6 +49,7 @@ def _size_of_dict(dictionary):
 P = productions(grammar)
 N = set(P.keys())
 T = {s.strip("'") for s in grammar.split() if s[0] == s[-1] == "'"} - {eps}
+
 
 def first(input):
     """ returns the FIRST set for a given input \in (N u T)* """
@@ -81,6 +76,7 @@ def first(input):
 
     return FirstA
 
+
 def followSet():
     """ Wrapper function for computing the FOLLOW sets of a given grammer """
     FOLLOW = {}
@@ -95,6 +91,7 @@ def followSet():
 
     return FOLLOW
 
+
 def _calcFollow(FOLLOW):
     """ Calculates one iteration of the FOLLOW sets for all A \in N at once.
     Several iterations have to be performed to retrieve the Complete FOLLOW sets
@@ -103,7 +100,7 @@ def _calcFollow(FOLLOW):
         for prod in P[A]:
             text = prod.split(sep=' ')
             for i in range(len(text) - 1):
-                B    = text[i].strip('[]')
+                B = text[i].strip('[]')
                 succ = text[i + 1]
 
                 if B in N:
@@ -116,6 +113,7 @@ def _calcFollow(FOLLOW):
                 FOLLOW[text[-1].strip('[]')] |= FOLLOW[A]
 
 FOLLOW = followSet()
+
 
 def parse_table():
     table = {t: {} for t in T | {'$$'}}
@@ -146,7 +144,8 @@ for k, v in parse_table().items():
 parse_table = parse_table()
 
 table = Texttable(max_width=180)
-matrix = [[left + ' -> ' + parse_table[t][left] if left in parse_table[t] else ' ' for t in parse_table if not t == eps] for left in N]
+matrix = [[left + ' -> ' + parse_table[t][left] if left in parse_table[t]
+           else ' ' for t in parse_table if not t == eps] for left in N]
 matrix.insert(0, [t for t in parse_table])
 table.add_rows(matrix)
 print(table.draw() + '\n')

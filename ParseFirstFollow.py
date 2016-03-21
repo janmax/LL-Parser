@@ -1,15 +1,16 @@
-class ParseFirstFollow(object):
+class ParseFirstFollow:
+
     """docstring for ParseFirstFollow"""
+
     def __init__(self, grammar, S):
-        super(ParseFirstFollow, self).__init__()
-        self.grammar     = grammar
-        self.S           = S
-        self.P           = self.productions()
-        self.N           = set(self.P.keys())
-        self.T           = {s.strip("'") for s in self.grammar.split() \
-                                         if s[0] == s[-1] == "'"} - {'eps'}
-        self.FOLLOW      = self.followSet()
-        self.parse_table = self.gen_parse_table()
+        self.grammar        = grammar
+        self.S              = S
+        self.P              = self.productions()
+        self.N              = set(self.P.keys())
+        self.T              = \
+            {s.strip("'") for s in self.grammar.split() if s[0] == s[-1] == "'"} - {'eps'}
+        self.FOLLOW         = self.followSet()
+        self.parse_table    = self.gen_parse_table()
 
     def productions(self):
         """ returns a dictionary with the left side of a production as keys and
@@ -20,7 +21,7 @@ class ParseFirstFollow(object):
             right = [s.strip() for s in right.split(sep='|')]
             P[left] = right
         for N in P:
-            if not self.grammar.find('[' + N + ']') == -1:
+            if '[' + N + ']' in self.grammar:
                 P[N].append('eps')
         return P
 
@@ -59,7 +60,7 @@ class ParseFirstFollow(object):
         return FirstA
 
     def followSet(self):
-        """ Wrapper function for computing the FOLLOW sets of a given grammar"""
+        """Wrapper function for computing the FOLLOW sets of a given grammar"""
         FOLLOW = {}
         for A in self.N:
             FOLLOW[A] = set()
@@ -73,14 +74,14 @@ class ParseFirstFollow(object):
         return FOLLOW
 
     def _calcFollow(self, FOLLOW):
-        """ Calculates one iteration of the FOLLOW sets for all A \in N at once.
-        Several iterations have to be performed to retrieve the Complete FOLLOW sets
-        """
+        """Calculates one iteration of the FOLLOW sets for all A \in N at once.
+        Several iterations have to be performed to retrieve the Complete FOLLOW
+        sets"""
         for A in self.N:
             for prod in self.P[A]:
                 text = prod.split(sep=' ')
                 for i in range(len(text) - 1):
-                    B    = text[i].strip('[]')
+                    B = text[i].strip('[]')
                     succ = text[i + 1]
 
                     if B in self.N:
@@ -111,7 +112,7 @@ class ParseFirstFollow(object):
         from texttable import Texttable
         table = Texttable(max_width=180)
         matrix = [[left + ' -> ' + self.parse_table[t][left]
-                    if left in self.parse_table[t] else ' '
+                if left in self.parse_table[t] else ' '
                     for t in self.parse_table if not t == 'eps']
                         for left in self.N]
         matrix.insert(0, [t for t in self.parse_table])
@@ -120,15 +121,16 @@ class ParseFirstFollow(object):
 
     def parse_expression(self, expr):
         stack = ['gamma', self.S]
-        expr  = expr.split() + ['$$']
+        expr = expr.split() + ['$$']
         while stack != ['gamma']:
             print('{0:70} | {1}'.format(' '.join(stack), ' '.join(expr)))
             if stack[-1] == expr[0]:
                 del stack[-1]
                 del expr[0]
             else:
-                prod = [s.strip("'[]") for s in self.parse_table[expr[0]][stack[-1]].split()]
+                prod = [s.strip("'[]")
+                        for s in self.parse_table[expr[0]][stack[-1]].split()]
                 del stack[-1]
-                if not 'eps' in prod:
+                if 'eps' not in prod:
                     stack += prod[::-1]
         print('{0:70} | {1}'.format(' '.join(stack), ' '.join(expr)))

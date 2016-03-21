@@ -14,7 +14,7 @@ grammar = """
     multOp      = '*' | '/'
 """.strip()
 
-# S = "E"
+# S = 'E'
 # grammar = """
 #     E   = T [E#] ;
 #     E#  = '+' T [E#] ;
